@@ -24,8 +24,12 @@ USAGE
 wait_for() {
   command="$*"
   for i in `seq $TIMEOUT` ; do
-    nc -z "$HOST" "$PORT" > /dev/null 2>&1
-
+      echo 'try again'
+    if [ "$QUIET" -eq 1 ]; then
+      nc -w 1 -z "$HOST" "$PORT" > /dev/null 2>&1
+    else
+      nc -w 1 -z "$HOST" "$PORT"
+    fi
     result=$?
     if [ $result -eq 0 ] ; then
       if [ -n "$command" ] ; then
