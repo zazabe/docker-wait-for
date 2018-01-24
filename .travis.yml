@@ -1,0 +1,23 @@
+sudo: required
+
+services:
+  - docker
+
+env:
+  global:
+    - VERSION
+    - DOCKER_USERNAME=cargomediabot
+    - secure: H9x8LdYwF9OGXUW4gSLPvRJerkpYISE/JFA8o7AQmO2/yF2l2OyqaN13dOuJyY30e5lgATx0+xaE1xXF/hMqPNLCQkeDhC1ieZmczdSswaYTu37bkqsfmzPDcAhkhVjM5fN6fzzIGBXHIXhEC4a+15yp6tYt/uzXUgyyuWVQlkeoG3jnZb3DmWFkudJ6H5EYIBEz77vTsD21cWO4LeAWr3SFsb9E+zNelRJnf2ww+RcGJIEkl9D8MHNsN8ZFP3CcKUhH9LZ/pCurNqzxhIyrdi1fsZ1Nm8I/9XxpITaTnNnYBomODfRWVprLTtfo6EXAsF8v61OVLLd3XeDb/wApCqh7ejdqztXO10Ixz8PFZGCUSuMmzplnWs1YIduNVmaa6RZeXVjZMtAcvMzDbNrVysS9IVWS/x9SzLQEUzgne7zikkr/xBpVFLmA7ggSph5G+qdCUwrBQhgiTDrm3XjNe8Io8XOJnzk8/YW+gdSaM9UmJZEt6k+OZLNh/jIqwQ5E4/tvC2DZd88EJRFuVJa7smPePUCIFxRSXxH3WI0tXPk8q7VAgRcXbkbhgKKEw3IYvtqSQ+u02qzhQVrWU5sLUjRd3XfLzd5awxvd5tv2QcVGMQU861MCizWd/govxvR77dXifeXiTnoteA+8hjr0+xshzgXXjZvBozlnkuCK8zU=
+
+script:
+  - docker build -t cargomedia/wait-for:latest .
+  - docker network create net-wait-for
+  - docker run -d --name listener --entrypoint '' --network net-wait-for cargomedia/wait-for:latest nc -l -p 1234
+  - docker run --network net-wait-for cargomedia/wait-for:latest listener:1234 --timeout=1
+
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: ./docker-push.sh
+  on:
+    branch: master
